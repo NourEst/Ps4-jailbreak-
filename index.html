@@ -6,78 +6,81 @@
 <title>Wobkot PS4 Jailbreak</title>
 <style>
   html, body { margin:0; padding:0; background:#0b0d10; color:#c8ced8;
-               font:15px/1.45 "Segoe UI", system-ui, sans-serif; }
-  #wrap { padding:16px 18px; }
-  #state { font-size:22px; font-weight:700; margin:0 0 6px; }
-  #det { font-size:13px; color:#8b95a3; margin:0 0 4px; }
-  #cache { font-size:12px; color:#5c6672; margin:0 0 10px; min-height:14px; }
+               font:15px/1.45 "Segoe UI", system-ui, sans-serif; text-align: center;}
+  #wrap { padding:40px 18px; }
+  #state { font-size:22px; font-weight:700; margin:0 0 10px; }
+  #cache { font-size:14px; color:#5c6672; margin:0 0 30px; min-height:14px; }
   #cache.cacheok { color:#7fd0a0; }
+  #btn { display: none; width: 80%; max-width: 400px; padding: 25px; 
+         background: #2ea043; color: white; font-size: 24px; font-weight: bold; 
+         border: none; border-radius: 8px; margin: 0 auto; cursor: pointer; }
   .warn { color:#d8c07f; }
-  #brand { text-align:center; padding:8px 10px; background:#0e1116;
+  #brand { text-align:center; padding:10px; background:#0e1116;
            border-bottom:1px solid #1e2732; }
-  #brand img { width:28px; height:28px; margin-right:8px; border-radius:50%;
-               vertical-align:middle; }
-  #brand b { font-size:15px; font-weight:700; letter-spacing:.14em;
-             color:#e6ebf2; vertical-align:middle; }
+  #brand b { font-size:18px; font-weight:700; letter-spacing:.14em; color:#e6ebf2; }
 </style>
 </head>
 <body>
-<div id="brand"><img src="logo_raw.png" alt="" width="28" height="28"><b>WOBKOT JAILBREAK</b></div>
+<div id="brand"><b>WOBKOT JAILBREAK</b></div>
 <div id="wrap">
   <div id="state">Initializing...</div>
-  <div id="det"></div>
-  <div id="cache"></div>
+  <div id="cache">Checking cache...</div>
+  
+  <!-- THE JAILBREAK BUTTON -->
+  <button id="btn" onclick="runExploit()">RUN JAILBREAK</button>
 </div>
 
-<!-- THIS IS THE CRITICAL LINE: It loads your Wobkot script -->
-<script src="main.js"></script>
-
 <script>
-(function () {
-    var stateEl = document.getElementById("state");
-    var cacheEl = document.getElementById("cache");
+  var stateEl = document.getElementById("state");
+  var cacheEl = document.getElementById("cache");
+  var btnEl = document.getElementById("btn");
+  var exploitLoaded = false;
+
+  // This function loads the Wobkot exploit when you press the button
+  function runExploit() {
+    btnEl.style.display = "none"; // Hide button so you don't double click
+    stateEl.textContent = "Running Exploit...";
+    stateEl.className = "warn";
     
-    function setState(t, c) { stateEl.textContent = t; stateEl.className = c || ""; }
-    function setCache(t, ok) { cacheEl.textContent = t; cacheEl.className = ok ? "cacheok" : ""; }
+    // Create a script tag to load Wobkot's main.js dynamically
+    var script = document.createElement("script");
+    script.src = "main.js";
+    script.onerror = function() {
+      stateEl.textContent = "ERROR: main.js not found!";
+      btnEl.style.display = "block";
+    };
+    document.body.appendChild(script);
+  }
 
-    var ac = window.applicationCache;
-    if (!ac || !document.documentElement.hasAttribute("manifest")) {
-        setState("Cache bypassed. Ready to run.", "warn");
-    } else if (!navigator.onLine) {
-        setCache("Offline -- loaded from cache", true);
-        setState("Ready to run.");
-    } else if (ac.status === ac.IDLE) {
-        setCache("Cached", true);
-        setState("Ready to run.");
-    } else if (ac.status === ac.UPDATEREADY) {
-        try { ac.swapCache(); } catch (e) {}
-        setCache("Update downloaded", true);
-        setState("UPDATE READY -- press X or tap to reload", "warn");
-        window.addEventListener("click", function() { location.reload(); });
-    } else {
-        setCache("Caching for offline (first run)...");
-        setState("Caching files...", "warn");
-        
-        ac.addEventListener("progress", function (e) {
-            if (e && e.total) setCache("Caching " + Math.round((e.loaded / e.total) * 100) + "%");
-        }, false);
+  function showButton(text) {
+    stateEl.textContent = text;
+    btnEl.style.display = "block"; // Show the big green button
+  }
 
-        ac.addEventListener("cached", function () {
-            setCache("Cached for offline use", true);
-            setState("CACHED (first run) -- press X or tap to run", "warn");
-        }, false);
-        ac.addEventListener("updateready", function () {
-            try { ac.swapCache(); } catch (e) {}
-            setCache("Update downloaded", true);
-            setState("UPDATE READY -- press X or tap to reload", "warn");
-            window.addEventListener("click", function() { location.reload(); });
-        }, false);
-        ac.addEventListener("noupdate", function () {
-            setCache("Cached -- offline ready", true);
-            setState("Ready to run.");
-        }, false);
-    }
-})();
+  var ac = window.applicationCache;
+  if (!ac || !document.documentElement.hasAttribute("manifest")) {
+    showButton("Ready (No Cache)");
+  } else if (ac.status === ac.IDLE || ac.status === ac.UPDATEREADY) {
+    setCache("Cached offline");
+    showButton("Ready to Run");
+  } else {
+    stateEl.textContent = "Caching files...";
+    ac.addEventListener("progress", function (e) {
+      if (e && e.total) cacheEl.textContent = "Caching " + Math.round((e.loaded / e.total) * 100) + "%";
+    }, false);
+
+    ac.addEventListener("cached", function () {
+      cacheEl.textContent = "Cached for offline use";
+      cacheEl.className = "cacheok";
+      showButton("Ready to Run");
+    }, false);
+    
+    ac.addEventListener("updateready", function () {
+      try { ac.swapCache(); } catch (e) {}
+      cacheEl.textContent = "Update downloaded";
+      showButton("Ready to Run");
+    }, false);
+  }
 </script>
 </body>
 </html>
