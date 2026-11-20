@@ -18,6 +18,7 @@
   #brand { text-align:center; padding:10px; background:#0e1116;
            border-bottom:1px solid #1e2732; }
   #brand b { font-size:18px; font-weight:700; letter-spacing:.14em; color:#e6ebf2; }
+  iframe { display: none; } /* Hides the background exploit page */
 </style>
 </head>
 <body>
@@ -28,40 +29,44 @@
   
   <!-- THE JAILBREAK BUTTON -->
   <button id="btn" onclick="runExploit()">RUN JAILBREAK</button>
+  
+  <!-- THIS IS WHERE THE EXPLOIT ACTUALLY RUNS -->
+  <iframe id="exploitFrame"></iframe>
 </div>
 
 <script>
   var stateEl = document.getElementById("state");
   var cacheEl = document.getElementById("cache");
   var btnEl = document.getElementById("btn");
-  var exploitLoaded = false;
+  var frameEl = document.getElementById("exploitFrame");
 
-  // This function loads the Wobkot exploit when you press the button
   function runExploit() {
-    btnEl.style.display = "none"; // Hide button so you don't double click
-    stateEl.textContent = "Running Exploit...";
+    btnEl.style.display = "none";
+    stateEl.textContent = "Running Exploit... Do not close browser.";
     stateEl.className = "warn";
     
-    // Create a script tag to load Wobkot's main.js dynamically
-    var script = document.createElement("script");
-    script.src = "main.js";
-    script.onerror = function() {
-      stateEl.textContent = "ERROR: main.js not found!";
-      btnEl.style.display = "block";
-    };
-    document.body.appendChild(script);
+    // Load main.js inside the hidden iframe
+    frameEl.srcdoc = `
+      <!DOCTYPE html>
+      <html>
+      <head><meta charset="utf-8"></head>
+      <body>
+        <script src="main.js"><\/script>
+      </body>
+      </html>
+    `;
   }
 
   function showButton(text) {
     stateEl.textContent = text;
-    btnEl.style.display = "block"; // Show the big green button
+    btnEl.style.display = "block"; 
   }
 
   var ac = window.applicationCache;
   if (!ac || !document.documentElement.hasAttribute("manifest")) {
     showButton("Ready (No Cache)");
   } else if (ac.status === ac.IDLE || ac.status === ac.UPDATEREADY) {
-    setCache("Cached offline");
+    cacheEl.textContent = "Cached offline";
     showButton("Ready to Run");
   } else {
     stateEl.textContent = "Caching files...";
@@ -72,12 +77,6 @@
     ac.addEventListener("cached", function () {
       cacheEl.textContent = "Cached for offline use";
       cacheEl.className = "cacheok";
-      showButton("Ready to Run");
-    }, false);
-    
-    ac.addEventListener("updateready", function () {
-      try { ac.swapCache(); } catch (e) {}
-      cacheEl.textContent = "Update downloaded";
       showButton("Ready to Run");
     }, false);
   }
