@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en" manifest="cache.appcache">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Wobkot PS4 Jailbreak</title>
+<style>
+  html, body { margin:0; padding:0; background:#0b0d10; color:#c8ced8;
+               font:15px/1.45 "Segoe UI", system-ui, sans-serif; }
+  #wrap { padding:16px 18px; }
+  #state { font-size:22px; font-weight:700; margin:0 0 6px; }
+  #det { font-size:13px; color:#8b95a3; margin:0 0 4px; }
+  #cache { font-size:12px; color:#5c6672; margin:0 0 10px; min-height:14px; }
+  #cache.cacheok { color:#7fd0a0; }
+  .warn { color:#d8c07f; }
+  #brand { text-align:center; padding:8px 10px; background:#0e1116;
+           border-bottom:1px solid #1e2732; }
+  #brand img { width:28px; height:28px; margin-right:8px; border-radius:50%;
+               vertical-align:middle; }
+  #brand b { font-size:15px; font-weight:700; letter-spacing:.14em;
+             color:#e6ebf2; vertical-align:middle; }
+</style>
+</head>
+<body>
+<div id="brand"><img src="logo_raw.png" alt="" width="28" height="28"><b>WOBKOT JAILBREAK</b></div>
+<div id="wrap">
+  <div id="state">Initializing...</div>
+  <div id="det"></div>
+  <div id="cache"></div>
+</div>
+
+<!-- THIS IS THE CRITICAL LINE: It loads your Wobkot script -->
+<script src="main.js"></script>
+
+<script>
+(function () {
+    var stateEl = document.getElementById("state");
+    var cacheEl = document.getElementById("cache");
+    
+    function setState(t, c) { stateEl.textContent = t; stateEl.className = c || ""; }
+    function setCache(t, ok) { cacheEl.textContent = t; cacheEl.className = ok ? "cacheok" : ""; }
+
+    var ac = window.applicationCache;
+    if (!ac || !document.documentElement.hasAttribute("manifest")) {
+        setState("Cache bypassed. Ready to run.", "warn");
+    } else if (!navigator.onLine) {
+        setCache("Offline -- loaded from cache", true);
+        setState("Ready to run.");
+    } else if (ac.status === ac.IDLE) {
+        setCache("Cached", true);
+        setState("Ready to run.");
+    } else if (ac.status === ac.UPDATEREADY) {
+        try { ac.swapCache(); } catch (e) {}
+        setCache("Update downloaded", true);
+        setState("UPDATE READY -- press X or tap to reload", "warn");
+        window.addEventListener("click", function() { location.reload(); });
+    } else {
+        setCache("Caching for offline (first run)...");
+        setState("Caching files...", "warn");
+        
+        ac.addEventListener("progress", function (e) {
+            if (e && e.total) setCache("Caching " + Math.round((e.loaded / e.total) * 100) + "%");
+        }, false);
+
+        ac.addEventListener("cached", function () {
+            setCache("Cached for offline use", true);
+            setState("CACHED (first run) -- press X or tap to run", "warn");
+        }, false);
+        ac.addEventListener("updateready", function () {
+            try { ac.swapCache(); } catch (e) {}
+            setCache("Update downloaded", true);
+            setState("UPDATE READY -- press X or tap to reload", "warn");
+            window.addEventListener("click", function() { location.reload(); });
+        }, false);
+        ac.addEventListener("noupdate", function () {
+            setCache("Cached -- offline ready", true);
+            setState("Ready to run.");
+        }, false);
+    }
+})();
+</script>
+</body>
+</html> window.applicationCache;
+    if (!ac || !document.documentElement.hasAttribute("manifest")) {
+        go();
+    } else if (!navigator.onLine) {
+        setCache("offline -- from cache", true);
+        go();
+    } else if (ac.status === ac.IDLE) {
+        setCache("cached", true);
+        go();
+    } else if (ac.status === ac.UPDATEREADY) {
+        try { ac.swapCache(); } catch (e) {}
+        setCache("update downloaded", true);
+        waitForTap("UPDATE READY -- press X or tap to reload & run",
+                   function () { location.reload(); });
+    } else {
+        setCache("checking cache...");
+        ac.addEventListener("downloading",
+            function () { setCache("caching for offline (first run)..."); }, false);
+        ac.addEventListener("progress", function (e) {
+            if (e && e.total)
+                setCache("caching " + Math.round((e.loaded / e.total) * 100) + "%");
+        }, false);
+
+        ac.addEventListener("cached", function () {
+            setCache("cached for offline use", true);
+            waitForTap("CACHED (first run) -- press X or tap to run", go);
+        }, false);
+        ac.addEventListener("updateready", function () {
+            try { ac.swapCache(); } catch (e) {}
+            setCache("update downloaded", true);
+            waitForTap("UPDATE READY -- press X or tap to reload & run",
+                       function () { location.reload(); });
+        }, false);
+
+        ac.addEventListener("noupdate", function () {
+            setCache("cached -- offline ready", true);
+            go();
+        }, false);
+        ac.addEventListener("error", function () {
+            setCache("cache unavailable");
+            waitForTap("CACHE FAILED -- press X or tap to run anyway", go);
+        }, false);
+        ac.addEventListener("obsolete", function () {
+            setCache("cache obsolete");
+            waitForTap("CACHE OBSOLETE -- press X or tap to run", go);
+        }, false);
+    }
+})();
+</script>
+</body>
+</html>
